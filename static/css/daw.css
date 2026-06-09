@@ -929,6 +929,50 @@ input, textarea { font-family: inherit; }
   font-size: 11px;
   color: var(--muted);
 }
+
+/* ─── Transpose row (inside daw-info-row) ─── */
+.transpose-row { padding-top: 6px; border-top: 1px solid var(--panel-border); margin-top: 2px; }
+.transpose-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.transpose-slider {
+  flex: 1;
+  min-width: 60px;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--panel-border);
+  outline: none;
+  cursor: pointer;
+}
+.transpose-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid rgba(0,0,0,0.3);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.15);
+  cursor: pointer;
+}
+.transpose-slider::-moz-range-thumb {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid rgba(0,0,0,0.3);
+  cursor: pointer;
+}
+.transpose-label {
+  font-size: 11px;
+  font-family: var(--font-mono, monospace);
+  color: var(--text);
+  min-width: 24px;
+  text-align: center;
+  font-weight: 600;
+}
+
 .daw-cover {
   width: 64px; height: 64px;
   border-radius: 8px;

@@ -21,7 +21,27 @@ _PCT_RE = re.compile(r"(\d{1,3})%")
 # while still catching genuine hangs (GPU deadlock, OOM stall, etc.).
 
 
+def _check_memory_pressure() -> None:
+    """Raise RuntimeError if macOS memory pressure is too high for demucs."""
+    try:
+        result = subprocess.run(
+            ["memory_pressure", "-Q"],
+            capture_output=True, text=True, timeout=5,
+        )
+        if "under memory pressure" in result.stdout.lower():
+            logger.warning("memory pressure too high, rejecting job")
+            raise RuntimeError(
+                "System memory pressure is too high to run stem separation. "
+                "Try again later or stop some other applications."
+            )
+    except FileNotFoundError:
+        pass  # Not macOS — skip check
+    except subprocess.TimeoutExpired:
+        logger.warning("memory_pressure check timed out, proceeding anyway")
+
+
 def separate(job: Job, source: Path, job_dir: Path) -> Path:
+    _check_memory_pressure()
     _set(job, status="separating", progress=0.0, stage="Separating stems...")
 
     cmd = [

@@ -181,12 +181,23 @@ async def get_stem_mp3(
     )
 
 
+def _atempo_value(ratio: float) -> str:
+    """Return an atempo filter string safe within [0.5, 2.0] bounds.
+
+    atempo is clamped to [0.5, 2.0] by ffmpeg. For our -12..+12 semitone
+    range (ratio 0.5..2.0) we stay within bounds, but clamp defensively.
+    """
+    clamped = max(0.5, min(2.0, ratio))
+    return f"{clamped:.6f}"
+
+
 @router.get("/jobs/{job_id}/mixdown.{ext}", response_model=None)
 async def get_mixdown(
     job_id: str,
     ext: str,
     stems: str = Query(..., description="Comma-separated lane names to sum"),
     gains: str = Query(..., description="Comma-separated linear gains, parallel to stems"),
+    transpose: int = Query(default=0, ge=-12, le=12, description="Pitch shift in semitones"),
     start: float | None = Query(default=None, ge=0, description="Trim start in seconds"),
     end: float | None = Query(default=None, gt=0, description="Trim end in seconds"),
 ) -> StreamingResponse:
@@ -194,7 +205,8 @@ async def get_mixdown(
     WAV or MP3. Mirrors the studio mixer (per-stem volume, mute, solo) so the
     exported file matches what is heard. The master fader is intentionally not
     applied -- it is a monitoring level, not part of the mix. Optional ?start=&end=
-    trims to a loop region."""
+    trims to a loop region. Optional ?transpose=N shifts pitch by N semitones
+    (-12..+12, one octave up or down)."""
     if ext not in ("wav", "mp3", "flac"):
         raise HTTPException(status_code=404, detail="not found")
 
@@ -234,11 +246,36 @@ async def get_mixdown(
     if n > 1:
         labels = "".join(f"[a{i}]" for i in range(n))
         filters.append(f"{labels}amix=inputs={n}:normalize=0[mix]")
-        out_label = "[mix]"
+        mix_label = "[mix]"
     else:
-        out_label = "[a0]"
+        mix_label = "[a0]"
+
+    if transpose != 0:
+        # Pitch shift via asetrate + atempo (no external deps).
+        # asetrate changes the sample rate metadata (altering pitch),
+        # then atempo restores the original tempo. -ar 44100 forces
+        # ffmpeg to resample back, preserving the pitched audio at the
+        # original duration.
+        ratio = 2.0 ** (transpose / 12.0)
+        atempo = _atempo_value(1.0 / ratio)
+        filters.append(
+            f"{mix_label}asetrate={44100 * ratio:.0f},atempo={atempo}[out]"
+        )
+        out_label = "[out]"
+        extra_args = ["-ar", "44100"]
+    else:
+        out_label = mix_label
+        extra_args = []
+
     codec = MIXDOWN_CODECS[ext]
-    cmd += ["-filter_complex", ";".join(filters), "-map", out_label, *post_seek, *codec, "pipe:1"]
+    cmd += [
+        "-filter_complex", ";".join(filters),
+        "-map", out_label,
+        *extra_args,
+        *post_seek,
+        *codec,
+        "pipe:1",
+    ]
 
     media_type = MIXDOWN_MEDIA_TYPES[ext]
     return StreamingResponse(

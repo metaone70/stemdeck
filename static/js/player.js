@@ -31,6 +31,7 @@ import {
 } from "./transport.js";
 import { stopVuLoop } from "./audio.js";
 import { destroySections } from "./sections.js";
+import { showTransposeRow, hideTransposeRow, getTransposeSemitones, wireTranspose } from "./export.js";
 
 // Feature flag for the Web Audio decode-and-mix engine (audioEngine.js).
 // Playback runs off decoded AudioBuffers on a single AudioContext clock instead
@@ -581,6 +582,7 @@ export function destroyPlayer() {
   document.querySelector(".app")?.classList.remove("engine-waveforms");
   document.querySelector(".app")?.classList.add("no-track");
   destroySections();
+  hideTransposeRow();
   stopVuLoop();
   stopStemVuLoop();
   if (audioEngine) {
@@ -660,6 +662,7 @@ export function destroyPlayer() {
 export function renderEmptyShell() {
   document.querySelector(".app")?.classList.remove("is-import");
   document.querySelector(".app")?.classList.add("no-track");
+  hideTransposeRow();
   stopStemVuLoop();
   ensureMixerStateDefaults();
   mixerEl.innerHTML = "";
@@ -848,6 +851,9 @@ export function wireUpAudio(jobId, stems, duration, thumbnail, mixUrl = null, ti
   }
 
   stemsChip.textContent = `${stems.length} Stems`;
+
+  showTransposeRow();
+  wireTranspose();
 
   if (thumbnail) {
     npThumb.onload = () => npThumb.classList.add("loaded");
@@ -1304,6 +1310,8 @@ function _mixdownUrl(ext, region) {
     stems: names.join(","),
     gains: gains.map((g) => g.toFixed(3)).join(","),
   });
+  const t = getTransposeSemitones();
+  if (t !== 0) q.set("transpose", String(t));
   if (region) {
     q.set("start", loopStart.toFixed(3));
     q.set("end", loopEnd.toFixed(3));

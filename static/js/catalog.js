@@ -4,6 +4,7 @@ import { wireUpAudio, updateFooterTrack } from "./player.js";
 import { initSections } from "./sections.js";
 import { bpmChip, keyChip, saveSelectedStems, selectedStems, titleEl } from "./state.js";
 import { showError, importFromUrl } from "./job.js";
+import { setOriginalKey } from "./export.js";
 import { fmtTime, storeGet, storeSet } from "./utils.js";
 
 // Escape user-supplied strings before inserting into innerHTML.
@@ -374,6 +375,7 @@ function applyTrackInfoToPanel(track) {
   titleEl.textContent = track.title || "Untitled track";
   bpmChip.textContent = track.bpm ? `${track.bpm} BPM` : "— BPM";
   keyChip.textContent = track.key || "— —";
+  if (track.key) setOriginalKey(track.key);
   updateFooterTrack({
     title: track.title,
     thumbnail: track.thumb,

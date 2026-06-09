@@ -291,6 +291,20 @@
               </div>
             </div>
 
+            <!-- Transpose row (hidden until a track is loaded) -->
+            <div class="daw-info-row transpose-row hidden" id="transposeRow">
+              <div class="daw-meta-card" data-meta="transpose">
+                <span class="meta-card-label">TRANSPOSE</span>
+                <div class="transpose-control">
+                  <input type="range" class="transpose-slider" id="transposeSlider"
+                         min="-12" max="12" value="0" step="1"
+                         aria-label="Transpose pitch in semitones" />
+                  <span class="transpose-label" id="transposeLabel">0</span>
+                </div>
+                <span class="meta-card-sub" id="transposeTargetKey">—</span>
+              </div>
+            </div>
+
             <!-- Row 2: stem presence cards -->
             <div class="stem-presence-panel">
               <div class="stem-card inactive" data-stem="vocals">

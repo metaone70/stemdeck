@@ -8,6 +8,7 @@ import { destroyPlayer, wireUpAudio, setWaveformLoading, updateFooterTrack } fro
 import { stagePhrases } from "./phrases.js";
 import { addTrackToLibrary, setCurrentTrack, updateTrackStatus, applyStemPresenceCards } from "./catalog.js";
 import { initSections } from "./sections.js";
+import { setOriginalKey } from "./export.js";
 
 // Playful stage label rotation (Claude-Code-style flair). The backend
 // emits truthful stage strings; we surface them in the small #job-detail
@@ -135,6 +136,7 @@ function applyState(state) {
   }
   if (state.bpm) bpmChip.textContent = `${state.bpm} BPM`;
   if (state.key) keyChip.textContent = state.key;
+  if (state.key) setOriginalKey(state.key);
   if (state.title || state.bpm || state.key || state.thumbnail) {
     updateFooterTrack({
       title: state.title,
