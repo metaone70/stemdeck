@@ -71,16 +71,19 @@ def app_version() -> str:
     # Version is git-tag-derived via hatch-vcs (#169). Prefer installed package
     # metadata (set at install/build from the tag); fall back to the generated
     # app/_version.py for non-installed runs, then a dev placeholder.
+    #
+    # Fork suffix is appended so the UI and /api/health identify this build.
+    _FORK_SUFFIX = "+fork1.1"
     try:
-        return package_version("stemdeck")
+        return package_version("stemdeck") + _FORK_SUFFIX
     except PackageNotFoundError:
         pass
     try:
         from app._version import __version__
 
-        return str(__version__)
+        return str(__version__) + _FORK_SUFFIX
     except Exception:
-        return "0.0.0-dev"
+        return "0.0.0-dev" + _FORK_SUFFIX
 
 
 async def _sweep_loop() -> None:
