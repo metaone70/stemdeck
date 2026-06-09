@@ -4,6 +4,10 @@
 
 **Free, local stem separation. No account. No upload. No subscription.**
 
+> 🎹 **Fork feature: Transpose Mixdown** — Pitch-shift your exported mix by ±12 semitones (one octave). Transpose slider appears in the track header after separation, and the footer Export Mix button automatically applies the selected shift. Pitch shifting is done via ffmpeg `asetrate`/`atempo` — no external dependencies.
+
+
+
 <div align="center">
   <a href="https://ci.popchores.app/repos/2"><img src="https://ci.popchores.app/api/badges/2/status.svg?event=push" alt="CI"></a>
   <a href="https://github.com/stemdeckapp/stemdeck/stargazers"><img src="https://img.shields.io/github/stars/stemdeckapp/stemdeck?style=flat-square" alt="GitHub Stars"></a>
@@ -52,7 +56,7 @@ If you find StemDeck useful, consider [buying the maker a coffee](https://www.bu
 
 **"Original" backing track.** When you pick a subset, a 7th lane contains the complement (full song minus selected stems), perfect for A/B reference without doubling.
 
-**Downloadable selected mix.** A single `mix.wav` of just your selected stems, summed via ffmpeg amix.
+**Downloadable selected mix.** A single `mix.wav` of just your selected stems, summed via ffmpeg amix. With optional **pitch transpose** (±12 semitones) applied during export.
 
 **Per-stem mixer** with volume fader, mute, solo, and "monitor" (solo-only) per stem. State syncs between the preview mixer and the stems sidebar.
 
@@ -84,7 +88,7 @@ StemDeck is not trying to compete with commercial stem-separation products. It c
 | **Processing speed** | Depends on your hardware; fast with a GPU, slow on CPU only | Fast regardless of your hardware (runs on their servers) |
 | **Batch processing** | One job at a time | Yes, on paid plans |
 | **Mobile app** | No | iOS and Android |
-| **Extra features** | No (no pitch shift, chord detection, lyrics, click track, BPM tap) | Yes, varies by product |
+| **Extra features** | Pitch shift on export (±12 semitones) | Yes, varies by product |
 | **Polish** | Functional, hobby-grade UI | Polished, production-grade apps |
 | **Source code** | Open source, forkable, self-hostable | Closed source |
 
@@ -299,6 +303,7 @@ Stems land in `./jobs/` on the host. Demucs weights are cached in a named volume
 | PATCH | `/api/jobs/{id}/sections` | Save waveform section markers for a job |
 | GET | `/api/jobs/{id}/stems/{name}.wav` | Stream a single stem WAV file |
 | GET | `/api/jobs/{id}/stems/{name}.mp3` | Transcode and stream a stem as MP3 |
+| GET | `/api/jobs/{id}/mixdown.{ext}` | Dynamic mixdown with `?transpose=N` (±12 semitones), streams WAV/MP3/FLAC |
 | DELETE | `/api/jobs/{id}` | Remove job dir from disk (terminal jobs only) |
 
 ---
